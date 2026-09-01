@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cat-yellow: #ffcd00;
+    --cat-charcoal: #231f20;
+    --surface-dark: #181a1b;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #181a1b;
+}
+::-webkit-scrollbar-thumb {
+  background: #393c3d;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffcd00;
+}
+
+/* Leaflet Map overrides for dark theme */
+.leaflet-container {
+  background: #141617 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: #202222 !important;
+  color: #f3f3f3 !important;
+  border: 1px solid #393c3d !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Pulse animation for active machine pins */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 205, 0, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 12px rgba(255, 205, 0, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 205, 0, 0);
+  }
+}
+
+.radar-pulse {
+  animation: pulse-ring 2s infinite cubic-bezier(0.455, 0.03, 0.515, 0.955);
+}

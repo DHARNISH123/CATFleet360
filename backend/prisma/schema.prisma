@@ -1,0 +1,148 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("FLEET_MANAGER") // ADMINISTRATOR, FLEET_MANAGER, TECHNICIAN
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  maintenanceTasks MaintenanceTask[]
+  activities       ActivityLog[]
+  savedViews       SavedView[]
+}
+
+model Asset {
+  id              String   @id @default(uuid())
+  assetId         String   @unique // e.g. CAT-EX-205, CAT-DZ-801
+  name            String
+  category        String   // Hydraulic Excavator, Track Type Tractor, Wheel Loader, Off-Highway Truck, Motor Grader, Articulated Truck
+  manufacturer    String   @default("Caterpillar")
+  model           String   // 320 GC, D8T, 950 GC, 770G, 140 GC
+  year            Int
+  status          String   @default("AVAILABLE") // OPERATIONAL, IDLE, UNDER_MAINTENANCE, ON_RENT, RETIRED
+  lifecycleStage  String   @default("AVAILABLE") // REGISTERED, AVAILABLE, ASSIGNED, IN_OPERATION, UNDER_MAINTENANCE, RENTAL, RETIRED
+  location        String   // Jobsite Alpha, West Quarry, Central Yard, South Highway Expansion
+  latitude        Float    @default(37.7749)
+  longitude       Float    @default(-122.4194)
+  utilization     Float    @default(0.0) // 0-100%
+  fuelLevel       Float    @default(85.0) // 0-100%
+  healthScore     Float    @default(95.0) // 0-100
+  operatingHours  Float    @default(1200.0)
+  serialNumber    String?
+  imageUrl        String?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  assignments      AssetAssignment[]
+  maintenanceTasks MaintenanceTask[]
+  rentals          Rental[]
+  activities       ActivityLog[]
+}
+
+model Operator {
+  id             String   @id @default(uuid())
+  employeeId     String   @unique // e.g. OP-8821
+  name           String
+  email          String   @unique
+  phone          String
+  status         String   @default("AVAILABLE") // ON_DUTY, AVAILABLE, ON_LEAVE, TRAINING
+  certifications String   // JSON or comma separated: "Heavy Excavator, Crane Safety Level II, Track Dozer"
+  safetyScore    Float    @default(98.0)
+  shift          String   @default("Morning (06:00 - 14:00)")
+  avatar         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  assignments    AssetAssignment[]
+}
+
+model AssetAssignment {
+  id           String    @id @default(uuid())
+  assetId      String
+  operatorId   String
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+  active       Boolean   @default(true)
+  notes        String?
+
+  asset        Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  operator     Operator  @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+}
+
+model MaintenanceTask {
+  id            String    @id @default(uuid())
+  assetId       String
+  title         String
+  description   String
+  priority      String    @default("MEDIUM") // CRITICAL, HIGH, MEDIUM, LOW
+  status        String    @default("REPORTED") // REPORTED, INSPECTION_REQUIRED, SCHEDULED, IN_PROGRESS, COMPLETED
+  technicianId  String?
+  scheduledDate DateTime?
+  completedDate DateTime?
+  cost          Float     @default(0.0)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  asset         Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  technician    User?     @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+}
+
+model Rental {
+  id             String    @id @default(uuid())
+  assetId        String
+  customerName   String
+  customerEmail  String
+  customerPhone  String?
+  startDate      DateTime
+  endDate        DateTime
+  status         String    @default("REQUESTED") // REQUESTED, APPROVED, ACTIVE, EXTENSION_REQUESTED, COMPLETED, CANCELLED
+  dailyRate      Float     @default(450.0)
+  estimatedCost  Float     @default(0.0)
+  actualCost     Float?
+  paymentStatus  String    @default("PENDING") // PENDING, PARTIALLY_PAID, PAID, REFUNDED
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  asset          Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  assetId      String?
+  activityType String   // ASSET_CREATED, ASSET_ASSIGNED, LIFECYCLE_CHANGED, MAINTENANCE_SCHEDULED, MAINTENANCE_COMPLETED, RENTAL_STARTED, RENTAL_RETURNED, TELEMETRY_ALERT
+  description  String
+  metadata     String?  // JSON string
+  createdAt    DateTime @default(now())
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  asset        Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+}
+
+model SavedView {
+  id             String   @id @default(uuid())
+  userId         String?
+  name           String
+  category       String?
+  status         String?
+  lifecycleStage String?
+  minUtil        Float?
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
