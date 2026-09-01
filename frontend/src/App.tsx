@@ -1,5 +1,4 @@
 import React from 'react';
-import { AppProvider, useApp } from './context/AppContext';
 import { NavigationRail } from './components/layout/NavigationRail';
 import { CommandBar } from './components/layout/CommandBar';
 import { OperationsOverview } from './features/dashboard/OperationsOverview';
@@ -9,52 +8,62 @@ import { LiveOperationsCenter } from './features/operations/LiveOperationsCenter
 import { MaintenanceWorkspace } from './features/maintenance/MaintenanceWorkspace';
 import { RentalManagement } from './features/rentals/RentalManagement';
 import { OperatorManagement } from './features/operators/OperatorManagement';
+import { DemandForecasting } from './features/forecast/DemandForecasting';
 import { AssetDetailDrawer } from './features/equipment/AssetDetailDrawer';
-import { CreateAssetModal } from './features/equipment/CreateAssetModal';
 import { CommandPaletteModal } from './components/common/CommandPaletteModal';
 import { SmartAlertsDrawer } from './components/common/SmartAlertsDrawer';
 import { QRCodeCheckInModal } from './components/common/QRCodeCheckInModal';
+import { CreateAssetModal } from './features/equipment/CreateAssetModal';
+import { useApp } from './context/AppContext';
 
-const MainContent: React.FC = () => {
+export function App() {
   const { activeTab, isQRModalOpen, setIsQRModalOpen, qrModalAsset } = useApp();
 
+  const renderActiveWorkspace = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <OperationsOverview />;
+      case 'equipment':
+        return <EquipmentExplorer />;
+      case 'lifecycle':
+        return <AssetLifecycleView />;
+      case 'forecast':
+        return <DemandForecasting />;
+      case 'operations':
+        return <LiveOperationsCenter />;
+      case 'maintenance':
+        return <MaintenanceWorkspace />;
+      case 'rentals':
+        return <RentalManagement />;
+      case 'operators':
+        return <OperatorManagement />;
+      default:
+        return <OperationsOverview />;
+    }
+  };
+
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#121314] text-gray-100">
-      {/* Collapsible Left Navigation Rail */}
+    <div className="flex h-screen w-screen bg-[#121314] text-gray-100 overflow-hidden font-sans">
+      {/* Navigation Rail */}
       <NavigationRail />
 
-      {/* Main Dynamic Workspace Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* Universal Top Command Bar */}
+      {/* Main App Workspace */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <CommandBar />
 
-        {/* Dynamic Central Workspace Content */}
-        <main className="flex-1 overflow-y-auto bg-[#141516] relative">
-          {activeTab === 'overview' && <OperationsOverview />}
-          {activeTab === 'equipment' && <EquipmentExplorer />}
-          {activeTab === 'lifecycle' && <AssetLifecycleView />}
-          {activeTab === 'operations' && <LiveOperationsCenter />}
-          {activeTab === 'maintenance' && <MaintenanceWorkspace />}
-          {activeTab === 'rentals' && <RentalManagement />}
-          {activeTab === 'operators' && <OperatorManagement />}
+        {/* Dynamic Workspace Container */}
+        <main className="flex-1 overflow-y-auto bg-[#121314]">
+          {renderActiveWorkspace()}
         </main>
       </div>
 
-      {/* Contextual Sliding Drawers & Universal Modals */}
+      {/* Contextual Modals & Sliding Drawers */}
       <AssetDetailDrawer />
-      <CreateAssetModal />
       <CommandPaletteModal />
       <SmartAlertsDrawer />
+      <CreateAssetModal />
       <QRCodeCheckInModal isOpen={isQRModalOpen} onClose={() => setIsQRModalOpen(false)} asset={qrModalAsset} />
     </div>
-  );
-};
-
-export function App() {
-  return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
   );
 }
 

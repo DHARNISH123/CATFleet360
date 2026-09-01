@@ -16,6 +16,9 @@ import {
 import { apiService } from '../../services/api';
 import { Asset, OperationalStatus } from '../../types';
 import { StatusBadge } from '../../components/common/StatusBadge';
+import { downloadEquipmentReport } from '../../utils/reportGenerator';
+import { playAlertSound } from '../../utils/sound';
+import { Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const EquipmentExplorer: React.FC = () => {
@@ -305,7 +308,7 @@ export const EquipmentExplorer: React.FC = () => {
               {/* Card Footer */}
               <div className="px-4 py-2.5 bg-[#171819] border-t border-[#2a2c2d] flex items-center justify-between text-[11px] font-mono text-gray-400">
                 <span>Health: <strong className="text-emerald-400">{asset.healthScore}/100</strong></span>
-                <span className="text-[#ffcd00] group-hover:underline">Inspect Details ➔</span>
+                <div className="flex items-center space-x-2"><button onClick={(e) => { e.stopPropagation(); playAlertSound('success'); downloadEquipmentReport(asset); }} className="text-[10px] px-2 py-0.5 rounded bg-[#252829] hover:bg-[#ffcd00] hover:text-black text-gray-300 flex items-center gap-1 transition-colors"><Download size={11} /> Report</button><span className="text-[#ffcd00] group-hover:underline">Inspect ➔</span></div>
               </div>
             </div>
           ))}

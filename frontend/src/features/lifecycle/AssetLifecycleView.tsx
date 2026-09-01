@@ -8,12 +8,16 @@ import {
   Truck,
   RotateCcw,
   Sparkles,
-  Info
+  Info,
+  ChevronRight,
+  ChevronLeft,
+  Play
 } from 'lucide-react';
 import { apiService } from '../../services/api';
 import { Asset, LifecycleStage } from '../../types';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { stages } from '../../components/common/LifecycleStepper';
+import { playAlertSound } from '../../utils/sound';
 import { useApp } from '../../context/AppContext';
 
 export const AssetLifecycleView: React.FC = () => {
@@ -24,6 +28,7 @@ export const AssetLifecycleView: React.FC = () => {
   const [targetStage, setTargetStage] = useState<LifecycleStage>('AVAILABLE');
   const [reason, setReason] = useState('');
   const [transitioning, setTransitioning] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -40,12 +45,39 @@ export const AssetLifecycleView: React.FC = () => {
   }, [refreshKey]);
 
   const activeAsset = assets.find((a) => a.id === selectedAssetId) || assets[0];
+  const currentStageIndex = stages.findIndex((s) => s.stage === (activeAsset?.lifecycleStage || 'AVAILABLE'));
+
+  const handleStepProgression = async (direction: 'next' | 'prev') => {
+    if (!activeAsset) return;
+    const nextIndex = direction === 'next'
+      ? Math.min(stages.length - 1, currentStageIndex + 1)
+      : Math.max(0, currentStageIndex - 1);
+    const nextStage = stages[nextIndex].stage;
+
+    playAlertSound('success');
+    setTransitioning(true);
+    try {
+      await apiService.updateLifecycle(
+        activeAsset.id,
+        nextStage,
+        `Step-by-step lifecycle progression: ${direction === 'next' ? 'Advanced' : 'Reverted'} to ${nextStage}`
+      );
+      activeAsset.lifecycleStage = nextStage;
+      triggerRefresh();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTransitioning(false);
+    }
+  };
 
   const handleExecuteTransition = async () => {
     if (!activeAsset) return;
+    playAlertSound('success');
     setTransitioning(true);
     try {
       await apiService.updateLifecycle(activeAsset.id, targetStage, reason || `Lifecycle transition to ${targetStage}`);
+      activeAsset.lifecycleStage = targetStage;
       triggerRefresh();
       setReason('');
     } catch (err) {
@@ -55,6 +87,26 @@ export const AssetLifecycleView: React.FC = () => {
     }
   };
 
+  const handleSimulateFullCycle = async () => {
+    if (!activeAsset || isSimulating) return;
+    setIsSimulating(true);
+    playAlertSound('checkin');
+
+    for (let i = 0; i < stages.length; i++) {
+      const stg = stages[i].stage;
+      await apiService.updateLifecycle(
+        activeAsset.id,
+        stg,
+        `Automated Full Cycle Demo: Progressed to ${stg}`
+      );
+      activeAsset.lifecycleStage = stg;
+      triggerRefresh();
+      await new Promise(r => setTimeout(r, 900));
+    }
+    setIsSimulating(false);
+    playAlertSound('success');
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto animate-in fade-in duration-200">
       {/* Header */}
@@ -62,25 +114,30 @@ export const AssetLifecycleView: React.FC = () => {
         <div>
           <div className="flex items-center space-x-2 text-xs font-mono text-[#ffcd00] uppercase tracking-wider mb-1">
             <GitBranch size={14} />
-            <span>State Machine & Asset Governance</span>
+            <span>State Machine & Lifecycle Governance</span>
           </div>
           <h1 className="text-xl font-bold text-white font-mono tracking-tight">
-            Asset Lifecycle Governance Workflow
+            Asset Lifecycle Step-by-Step Progression
           </h1>
           <p className="text-xs text-gray-400 font-sans mt-0.5">
-            Every heavy machine transitions strictly through verified enterprise lifecycle stages with immutable audit logs.
+            Every heavy machine transitions sequentially through 7 verified enterprise lifecycle stages with immutable audit logs.
           </p>
         </div>
 
-        <div className="bg-[#121314] px-3.5 py-2 rounded border border-[#2e3132] text-xs font-mono text-gray-300">
-          <span className="text-[#ffcd00] font-bold">7 Stages:</span> Registered ➔ Available ➔ Assigned ➔ In Operation ➔ Maintenance ➔ Rental ➔ Retired
-        </div>
+        <button
+          disabled={isSimulating}
+          onClick={handleSimulateFullCycle}
+          className="flex items-center space-x-2 px-3.5 py-2 bg-[#ffcd00] hover:bg-[#e6b800] disabled:bg-gray-700 text-black font-bold font-mono text-xs rounded transition-colors shadow-md"
+        >
+          <Play size={13} />
+          <span>{isSimulating ? 'Simulating Cycle...' : 'Simulate Full 7-Stage Progression'}</span>
+        </button>
       </div>
 
-      {/* Main Interactive Transition Workspace (Grid) */}
+      {/* Main Interactive Transition Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Machinery Selector (4 cols) */}
-        <div className="lg:col-span-4 bg-[#1d1f20] border border-[#2e3132] rounded-lg p-4 shadow-lg flex flex-col h-[600px]">
+        <div className="lg:col-span-4 bg-[#1d1f20] border border-[#2e3132] rounded-lg p-4 shadow-lg flex flex-col h-[620px]">
           <div className="text-xs font-mono font-bold text-white uppercase tracking-wider pb-3 border-b border-[#2e3132] mb-3 flex items-center justify-between">
             <span>Select Machine</span>
             <span className="text-gray-500 font-normal">{assets.length} Units</span>
@@ -117,18 +174,18 @@ export const AssetLifecycleView: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Stage Visualizer & State Transition Controller (8 cols) */}
+        {/* Right Column: Step-by-Step Controller (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
           {activeAsset ? (
             <>
-              {/* Machine Overview Banner */}
-              <div className="bg-[#1d1f20] border border-[#2e3132] rounded-lg p-5 shadow-lg">
-                <div className="flex items-center justify-between pb-3 border-b border-[#2e3132] mb-4">
-                  <div className="flex items-center space-x-3">
+              {/* Machine Banner with Next / Previous Step Buttons */}
+              <div className="bg-[#1d1f20] border border-[#2e3132] rounded-lg p-5 shadow-lg space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-[#2e3132]">
+                  <div className="flex items-center space-x-3.5">
                     <img
                       src={activeAsset.imageUrl}
                       alt={activeAsset.name}
-                      className="w-12 h-12 rounded object-cover border border-[#393c3d]"
+                      className="w-14 h-14 rounded object-cover border border-[#393c3d]"
                     />
                     <div>
                       <h2 className="text-base font-bold text-white">{activeAsset.name}</h2>
@@ -137,54 +194,70 @@ export const AssetLifecycleView: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => openAssetDetail(activeAsset)}
-                    className="px-3 py-1 bg-[#282a2b] hover:bg-[#ffcd00] hover:text-black text-xs font-mono font-semibold rounded transition-colors"
-                  >
-                    Full Specs ➔
-                  </button>
+
+                  {/* Step Buttons */}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      disabled={transitioning || currentStageIndex === 0}
+                      onClick={() => handleStepProgression('prev')}
+                      className="px-3 py-1.5 bg-[#252829] hover:bg-[#323638] disabled:opacity-40 text-gray-200 font-mono text-xs rounded border border-[#393c3d] flex items-center space-x-1"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>Prev Stage</span>
+                    </button>
+                    <button
+                      disabled={transitioning || currentStageIndex === stages.length - 1}
+                      onClick={() => handleStepProgression('next')}
+                      className="px-3.5 py-1.5 bg-[#ffcd00] hover:bg-[#e6b800] disabled:opacity-40 text-black font-mono font-bold text-xs rounded shadow-md flex items-center space-x-1"
+                    >
+                      <span>Next Stage</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Interactive Visual Stepper */}
-                <div className="mb-4">
-                  <div className="text-xs font-mono text-gray-400 uppercase mb-2">
-                    Current Stage Progression:
+                {/* Visual 7-Stage Stepper Progression */}
+                <div>
+                  <div className="flex items-center justify-between text-xs font-mono text-gray-400 uppercase mb-2">
+                    <span>Sequential Progression (Stage {currentStageIndex + 1} of 7):</span>
+                    <span className="text-[#ffcd00] font-bold">{stages[currentStageIndex]?.label}</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                     {stages.map((stg, index) => {
                       const isCurrent = stg.stage === activeAsset.lifecycleStage;
+                      const isPassed = index < currentStageIndex;
                       return (
                         <div
                           key={stg.stage}
                           className={`p-2.5 rounded border text-center transition-all ${
                             isCurrent
-                              ? 'bg-[#ffcd00] text-black font-bold border-[#ffcd00] shadow-md shadow-amber-500/20'
+                              ? 'bg-[#ffcd00] text-black font-bold border-[#ffcd00] shadow-md'
+                              : isPassed
+                              ? 'bg-[#15231c] border-emerald-900/50 text-emerald-400'
                               : 'bg-[#161718] border-[#2a2c2d] text-gray-400'
                           }`}
                         >
                           <div className="text-[10px] font-mono uppercase truncate">{stg.label}</div>
-                          {isCurrent && (
-                            <div className="text-[9px] font-mono uppercase mt-0.5 font-extrabold tracking-wider">
-                              ACTIVE
-                            </div>
-                          )}
+                          <div className="text-[9px] font-mono uppercase mt-0.5 opacity-80">
+                            {isCurrent ? 'ACTIVE' : isPassed ? 'DONE ✓' : 'QUEUED'}
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Stage Transition Action Box */}
+                {/* Transition Reason & Notes */}
                 <div className="p-4 bg-[#161718] border border-[#2e3132] rounded space-y-3">
                   <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
                     <Sparkles size={14} className="text-[#ffcd00]" />
-                    <span>Execute Stage Transition</span>
+                    <span>Direct Jump Stage Selector</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-[11px] font-mono text-gray-400 mb-1">
-                        Select Target Lifecycle Stage
+                        Select Target Stage
                       </label>
                       <select
                         value={targetStage}
@@ -201,7 +274,7 @@ export const AssetLifecycleView: React.FC = () => {
 
                     <div>
                       <label className="block text-[11px] font-mono text-gray-400 mb-1">
-                        Authorization Reason / Work Order Note
+                        Audit Note / Authorization Reason
                       </label>
                       <input
                         type="text"
@@ -223,17 +296,6 @@ export const AssetLifecycleView: React.FC = () => {
                       <span>{transitioning ? 'Recording Audit...' : 'Commit Lifecycle Transition'}</span>
                     </button>
                   </div>
-                </div>
-              </div>
-
-              {/* State Transition Example Pathway Info */}
-              <div className="bg-[#1d1f20] border border-[#2e3132] rounded-lg p-5 shadow-lg">
-                <div className="text-xs font-mono font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <Info size={14} className="text-sky-400" />
-                  <span>Standard Heavy Fleet Lifecycle Journey</span>
-                </div>
-                <div className="p-3 bg-[#161718] rounded border border-[#2a2c2d] text-xs font-mono text-gray-300 leading-relaxed">
-                  Registered ➔ Available ➔ Assigned to Operator ➔ Active In Operation ➔ Maintenance Flagged ➔ Service Completed ➔ Available Pool ➔ Commercial Rental
                 </div>
               </div>
             </>

@@ -23,6 +23,8 @@ import { StatusBadge } from '../../components/common/StatusBadge';
 import { LifecycleStepper } from '../../components/common/LifecycleStepper';
 import { apiService } from '../../services/api';
 import { LifecycleStage } from '../../types';
+import { downloadEquipmentReport } from '../../utils/reportGenerator';
+import { playAlertSound } from '../../utils/sound';
 
 export const AssetDetailDrawer: React.FC = () => {
   const {
@@ -43,6 +45,7 @@ export const AssetDetailDrawer: React.FC = () => {
 
   const handleStageChange = async (newStage: LifecycleStage) => {
     try {
+      playAlertSound('success');
       await apiService.updateLifecycle(selectedAsset.id, newStage, transitionNotes || `Transferred to ${newStage}`);
       selectedAsset.lifecycleStage = newStage;
       triggerRefresh();
@@ -51,6 +54,11 @@ export const AssetDetailDrawer: React.FC = () => {
     } catch (err) {
       console.error('Failed to change stage:', err);
     }
+  };
+
+  const handleDownloadDoc = (docName: string) => {
+    playAlertSound('success');
+    downloadEquipmentReport(selectedAsset, docName);
   };
 
   return (
@@ -139,7 +147,7 @@ export const AssetDetailDrawer: React.FC = () => {
             { id: 'overview', label: 'Overview', icon: Truck },
             { id: 'usage', label: 'Usage & Telemetry', icon: Activity },
             { id: 'maintenance', label: 'Maintenance', icon: Wrench },
-            { id: 'documents', label: 'Documents', icon: FileText },
+            { id: 'documents', label: 'Documents & Reports', icon: FileText },
             { id: 'activity', label: 'Activity Log', icon: Clock },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -293,30 +301,50 @@ export const AssetDetailDrawer: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 4: DOCUMENTS */}
+          {/* TAB 4: DOCUMENTS & REPORTS */}
           {activeTab === 'documents' && (
-            <div className="space-y-2.5">
-              {[
-                { name: 'Cat Operation & Maintenance Manual.pdf', size: '14.2 MB', date: '2024-01-15' },
-                { name: 'OSHA Heavy Machinery Safety Compliance Certificate.pdf', size: '2.1 MB', date: '2024-03-20' },
-                { name: 'OEM Telematics Unit Spec Sheet.pdf', size: '890 KB', date: '2024-05-12' },
-              ].map((doc, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-3 bg-[#161718] border border-[#282a2b] rounded hover:border-gray-500 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <FileText size={18} className="text-[#ffcd00]" />
-                    <div>
-                      <div className="font-semibold text-white text-xs">{doc.name}</div>
-                      <div className="text-[10px] font-mono text-gray-500">{doc.size} • {doc.date}</div>
-                    </div>
-                  </div>
-                  <button className="p-1.5 rounded hover:bg-[#252829] text-gray-400 hover:text-white">
-                    <Download size={14} />
-                  </button>
+            <div className="space-y-3">
+              <div className="p-3 bg-[#161718] border border-[#ffcd00]/30 rounded flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-mono font-bold text-white block">Official Machine Compliance Audit Report</span>
+                  <span className="text-[11px] text-gray-400">Generates instant Caterpillar certification document</span>
                 </div>
-              ))}
+                <button
+                  onClick={() => handleDownloadDoc('Official_Compliance_Audit')}
+                  className="px-3 py-1.5 bg-[#ffcd00] hover:bg-[#e6b800] text-black font-mono font-bold text-xs rounded flex items-center space-x-1.5 shadow-md"
+                >
+                  <Download size={14} />
+                  <span>Download Report</span>
+                </button>
+              </div>
+
+              <div className="space-y-2.5">
+                {[
+                  { name: 'Cat Operation & Maintenance Manual.pdf', size: '14.2 MB', date: '2024-01-15' },
+                  { name: 'OSHA Heavy Machinery Safety Compliance Certificate.pdf', size: '2.1 MB', date: '2024-03-20' },
+                  { name: 'OEM Telematics Unit Spec Sheet.pdf', size: '890 KB', date: '2024-05-12' },
+                ].map((doc, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 bg-[#161718] border border-[#282a2b] rounded hover:border-gray-500 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <FileText size={18} className="text-[#ffcd00]" />
+                      <div>
+                        <div className="font-semibold text-white text-xs">{doc.name}</div>
+                        <div className="text-[10px] font-mono text-gray-500">{doc.size} • {doc.date}</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDownloadDoc(doc.name)}
+                      className="px-2.5 py-1 rounded bg-[#252829] hover:bg-[#ffcd00] hover:text-black text-gray-300 text-xs font-mono flex items-center space-x-1 transition-colors"
+                    >
+                      <Download size={12} />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
