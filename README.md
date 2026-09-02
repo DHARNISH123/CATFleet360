@@ -1,74 +1,95 @@
 # CATFleet360 Enterprise Heavy Equipment & Fleet Operating System
 
-**CATFleet360** is a full-stack enterprise equipment and fleet management platform engineered with an Industrial Precision design language (Cat Yellow `#ffcd00` & Charcoal `#231f20`).
+[![Live Server](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://frontend-ruby-tau-16.vercel.app)
+[![GitHub Pages](https://img.shields.io/badge/Live%20Demo-GitHub%20Pages-blue?style=for-the-badge&logo=github)](https://dharnish123.github.io/CATFleet360/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+
+> **Live Production Server**: 🌐 [**https://frontend-ruby-tau-16.vercel.app**](https://frontend-ruby-tau-16.vercel.app)  
+> **GitHub Pages Backup**: 🌐 [**https://dharnish123.github.io/CATFleet360/**](https://dharnish123.github.io/CATFleet360/)
+
+**CATFleet360** is a full-stack enterprise equipment and fleet management operating system engineered with an authentic **Caterpillar Industrial Precision** design language (Cat Yellow `#ffcd00` & Charcoal `#231f20`).
 
 ---
 
-## 🌟 Core Architecture & Key Differentiators
+## 🌐 Live Deployment & Access Links
 
-Unlike traditional dashboards that rely on static pages and generic cards, **CATFleet360** introduces an enterprise workspace experience:
+| Environment | Live URL | Status |
+| :--- | :--- | :--- |
+| 🚀 **Vercel Production (Primary)** | [**https://frontend-ruby-tau-16.vercel.app**](https://frontend-ruby-tau-16.vercel.app) | 🟢 **Live & Active** |
+| 🌍 **GitHub Pages (Backup)** | [**https://dharnish123.github.io/CATFleet360/**](https://dharnish123.github.io/CATFleet360/) | 🟢 **Live & Active** |
+| 🐙 **GitHub Repository** | [**https://github.com/DHARNISH123/CATFleet360**](https://github.com/DHARNISH123/CATFleet360) | 🟢 **Main Branch** |
 
-1. **Workspace-Based Interface**:
-   - **Collapsible Navigation Rail**: Fast multi-tab switching with real-time telemetry health indicator.
-   - **Universal Command Bar**: `Ctrl+K` global search across machinery, operators, work orders, and rentals; role-switching dropdown (Administrator, Fleet Manager, Technician); notification drawer; quick action creator.
-   - **Contextual Sliding Drawers**: Inspect machine details, telemetry, and service manuals without losing your place in the workspace.
+---
 
-2. **Operations Overview Hub**:
-   - **Fleet Health Engine**: Computes real-time health score (0-100) combining availability rate, utilization, and overdue service alerts.
-   - **Interactive KPI Cards**: Clickable drill-down filtering by operational status and machinery category.
-   - **Live Activity Timeline**: Chronological operational event feed with automated triggers.
+## 🔑 Demo Access & Role Accounts
 
-3. **Equipment Explorer**:
-   - **Dual Views**: High-density Grid View and Table View.
-   - **Saved Filter Presets**: "All Fleet Machinery", "High Utilization Equipment", "Assets Needing Maintenance", and "Hydraulic Excavators".
-   - **5-Tab Sliding Asset Drawer**: Overview & Specs, Usage & Runtime Graphs, Maintenance History, PDF Documents/Manuals, and Chronological Audit History.
+Instant role switcher available in the top-right command bar, or sign in directly with:
 
-4. **Asset Lifecycle Governance Workflow**:
-   - Visual 7-Stage State Machine: `Registered` ➔ `Available` ➔ `Assigned` ➔ `In Operation` ➔ `Under Maintenance` ➔ `Rental` ➔ `Retired`.
-   - Authorized stage transition controller with audit logging.
+| Role | Email | Password | Platform Permissions |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@catfleet360.com` | `catfleet2026` | Full platform control, asset registration, role management |
+| **Fleet Manager** | `manager@catfleet360.com` | `catfleet2026` | Dispatching, rentals, lifecycle stage transitions, operator linking |
+| **Technician** | `tech@catfleet360.com` | `catfleet2026` | Work orders, 5-stage Maintenance Kanban board, inspections |
 
-5. **Live Operations Center (Geospatial Tracking)**:
-   - **Interactive Leaflet Map**: Machinery GPS coordinates, custom color-coded status pins, and interactive floating telemetry inspector.
-   - **Operations Radio Feed**: Real-time simulated telemetry and geofence events stream.
+---
 
-6. **Maintenance Workspace**:
-   - **Maintenance Kanban Board**: Interactive column workflow (`Reported` ➔ `Inspection Required` ➔ `Scheduled` ➔ `In Progress` ➔ `Completed`).
-   - **Maintenance Planner**: Timeline schedule with cost and technician tracking.
-   - **Work Order Creator**: Log new service requests with component priority.
+## 🌟 Core Features & Modules
 
-7. **Commercial Rental Management**:
-   - End-to-end workflow: `Requested` ➔ `Approved` ➔ `Active` ➔ `Completed`.
-   - Automated duration and cost calculation ($/day rate * days).
+### 1. 🛰️ Live Geospatial Operations Center
+- **Free Multi-Layer GIS Map Tile API Switcher**: High-res Satellite (ESRI), Tactical Dark (CartoDB), Streets (OpenStreetMap), and Topo Elevation (OpenTopoMap).
+- **International Quick-Jump Regions**: Jump between USA California Quarry, India Chennai/Bangalore corridor, Australia Pilbara Iron Ore Pit, and Europe Rail Terminal.
+- **Real-Time Telemetry & Radio Feed**: Streaming operational events with pause/play controls.
 
-8. **Certified Operator Directory**:
-   - Operator profiles, OSHA/Cat Grade assist certifications, safety ratings, shift schedules, and machinery assignment modals.
+### 2. 📊 Smart Rental Tracking, Demand Forecasting & AI Anomaly Engine
+- **Exact Problem Statement Dataset**: Built-in tracking for `EQX1001` through `EQX1007` across Sites `S001` to `S006`.
+- **Automated Anomaly Detection**: Flags high idle hours, ghost unassigned assets, and misallocated machinery with 1-click **"Auto-Fix"**.
+- **14-Day Demand Pre-Positioning**: AI matrix forecasting upcoming site machinery requirements.
+
+### 3. 🚜 Equipment Explorer & 5-Tab Sliding Drawer
+- High-density Grid and Table views with instant search, category filtering, and saved presets.
+- **5-Tab Deep Inspector**: Overview & Specs, 7-Day Usage Telemetry Graphs, Maintenance History, Documents, and Chronological Activity Trail.
+- **Official Compliance Reports**: Instant 1-click generation and download of Caterpillar Inspection & Compliance documents.
+
+### 4. 🔄 Step-by-Step Asset Lifecycle Governance
+- Deterministic 7-stage state machine: `Registered` ➔ `Available` ➔ `Assigned` ➔ `In Operation` ➔ `Under Maintenance` ➔ `Rental` ➔ `Retired`.
+- Step buttons (`Prev Stage ⬅`, `Next Stage ➔`) and 1-click **"Simulate Full 7-Stage Progression"**.
+
+### 5. 📱 QR Code Digital Check-In / Check-Out Terminal
+- Instant operator shift handovers, meter reading sync, fuel level logging, and OSHA pre-trip safety walkaround inspection certification.
+
+### 6. 🛠️ Maintenance Kanban & Commercial Rentals
+- Drag-and-drop 5-column Kanban board (`Reported` ➔ `Inspection` ➔ `Scheduled` ➔ `In Progress` ➔ `Completed`).
+- Rental contract calculator with automatic cost estimation (`days * dailyRate`).
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, Leaflet.
-- **Backend**: Node.js, Express.js, TypeScript, Prisma ORM, SQLite / PostgreSQL support, JWT Authentication, bcryptjs, CORS.
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, Leaflet / React-Leaflet GIS.
+- **Backend**: Node.js, Express.js, TypeScript, Prisma ORM, SQLite / PostgreSQL, JWT Authentication, bcryptjs, CORS.
 - **Design System**: Caterpillar Industrial Precision (`#ffcd00`, `#231f20`, JetBrains Mono & Inter typography).
+- **Deployment**: Vercel, GitHub Pages, Render (`render.yaml`).
 
 ---
 
-## 🚀 Running the Application
+## 💻 Local Development Setup
 
-### 1. Backend Server (Port 5000)
+### 1. Start Backend:
 ```bash
 cd backend
 npm install
 npx prisma db push
-npx ts-node prisma/seed.ts
 npm run dev
 ```
 
-### 2. Frontend Application (Port 3000)
+### 2. Start Frontend:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Open [**http://localhost:3000**](http://localhost:3000) in your browser.
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+---
+
+© 2026 CATFleet360. Developed for the Caterpillar Hackathon.
